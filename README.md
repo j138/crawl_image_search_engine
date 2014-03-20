@@ -4,7 +4,9 @@
 10行目のkw_list書き換えて入力
 
 キーワードリストをファイルで用意し、target_fileに記載
+
 crawl-image.rbの上のほう書き換えて、適当に設定
+
 yahooとgoogle画像検索に対応
 
 ```
