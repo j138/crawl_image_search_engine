@@ -65,7 +65,7 @@ def http_request(uri)
 
   # http.set_debug_output $stderr
   body = http.get(uri).body
-  File.write('debug.html', body)
+  # File.write('debug.html', body)
   body
 end
 
