@@ -7,9 +7,7 @@ require 'digest/md5'
 require 'nokogiri'
 
 # Config =========================
-kw_list = %W(lol Diablo blizzard)
-# target_file = 'jawiki-20140225-all-titles.chip'
-target_file = 'jawiki-20140225-all-titles'
+target_file = 'search_keyword.txt'
 save_dir = 'img/'
 
 # 検索するエンジン
@@ -122,10 +120,6 @@ end
 
 Dir.mkdir(save_dir) unless File.directory?(save_dir)
 
-# target->hash
-kw_list.each { |kw| crawl_image(kw, save_dir, provider, job_que) }
-
-# # target->file(kw_list)
 count = 0
 if File.exist?(target_file)
   File.foreach(target_file) do |line|
