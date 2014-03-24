@@ -101,20 +101,20 @@ end
 
 def crawl_image(kw, save_dir, provider, job_que)
   puts '[reserve]' + kw
-  uri = ''
+
+  doc = Nokogiri::HTML.parse(http_request(gen_crawl_uri(kw, provider)))
   case provider
   when 'google'
-    doc = Nokogiri::HTML.parse(http_request(gen_crawl_uri(kw, provider)))
-    doc.css('a img').each do |node|
-      uri = node.attribute('src').value
-      job_que.push(uri: uri, save_dir: save_dir, filename: Digest::MD5.hexdigest(uri)) if uri != ''
-    end
+    target_parent = 'a img'
+    target_attr = 'src'
   when 'yahoo'
-    doc = Nokogiri::HTML.parse(http_request(gen_crawl_uri(kw, provider)))
-    doc.css('.tb a').each do |node|
-      uri = node.attribute('href').value
-      job_que.push(uri: uri, save_dir: save_dir, filename: Digest::MD5.hexdigest(uri)) if uri != ''
-    end
+    target_parent = '.tb a'
+    target_attr = 'href'
+  end
+
+  doc.css(target_parent).each do |node|
+    uri = node.attribute(target_attr).value
+    job_que.push(uri: uri, save_dir: save_dir, filename: Digest::MD5.hexdigest(uri)) if uri != ''
   end
 end
 
