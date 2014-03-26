@@ -1,0 +1,9 @@
+{
+  "target_file": "search_keyword.txt",
+  "save_dir": "img/",
+  "provider": "yahoo",
+  "yahoo_id": "ur-yahoo-id",
+  "yahoo_password": "ur-passwd",
+  "thread_max": 10,
+  "download_limit": 10000
+}
