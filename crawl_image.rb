@@ -49,8 +49,8 @@ agent = init_agent(config)
 puts 'initialized agent'
 
 # generate Query for google Image Search
-def gen_crawl_uri(kw, provider)
-  case provider
+def gen_crawl_uri(kw, config)
+  case config['provider']
   when 'google'
     # safe_search_params
     safe_querys = %W(off medium high)
@@ -64,6 +64,9 @@ def gen_crawl_uri(kw, provider)
       hs: 'zfJ', bav: 'on.2,or.r_cp.', biw: '1440', bih: '694', um: '1', pws: 0
     }
 
+    # 顔検索フラグ
+    query_hash['tbs'] = 'itp:face' if config['detect_face']
+
   when 'yahoo'
     host = 'http://image.search.yahoo.co.jp/search?'
     query_hash = {
@@ -72,6 +75,9 @@ def gen_crawl_uri(kw, provider)
       # ctype: 'face',
       rkf: 1, imw: 0, imh: 0, imt: '', dim: '', imcolor: ''
     }
+
+    # 顔検索フラグ
+    query_hash['ctype'] = 'face' if config['detect_face']
   end
 
   host + query_hash.map { |k, v| "#{k}=#{v}" }.join('&')
@@ -141,11 +147,11 @@ def download_file(uri, save_dir, filename)
   end
 end
 
-def get_image_urls(kw, provider, agent)
+def get_image_urls(kw, config, agent)
   puts '[reserve]' + kw
 
-  doc = Nokogiri::HTML.parse(http_request(gen_crawl_uri(kw, provider), provider, agent))
-  case provider
+  doc = Nokogiri::HTML.parse(http_request(gen_crawl_uri(kw, config), config['provider'], agent))
+  case config['provider']
   when 'google'
     target_parent = 'a img'
     target_attr = 'src'
@@ -158,7 +164,7 @@ def get_image_urls(kw, provider, agent)
   doc.css(target_parent).each do |node|
     uri = node.attribute(target_attr).value
 
-    if provider == 'yahoo'
+    if config['provider'] == 'yahoo'
       fake_uri = uri.split('**')
       uri = URI.decode(fake_uri[1])
     end
@@ -179,7 +185,7 @@ end
 # 検索用キーワードから画像リストを生成し、バッファしとく
 seeq_file = Enumerator.new do |uri|
   File.foreach(config['target_file']) do |search_kw|
-    get_image_urls(search_kw.chomp!, config['provider'], agent).each { | img_uri | uri << img_uri }
+    get_image_urls(search_kw.chomp!, config, agent).each { | img_uri | uri << img_uri }
   end
 end
 
@@ -196,6 +202,8 @@ seeq_thread << Thread.start do
   is_file_loaded = true
 end
 
+# スレッド[seeq_thread]が終わった時の処理を入れないと
+
 puts '[file_seeq] buffering 5 sec'
 sleep 5
 
@@ -208,7 +216,7 @@ count = 0
 
 # ファイルのロード中ならスレッド生成機構を止めない
 loop do
-  puts '[loop-start]is_file_loading:' + is_file_loaded.to_s
+  puts '[loop-start]is_file_loaded:' + is_file_loaded.to_s
 
   config['thread_max'].times do
     threads << Thread.start do
@@ -227,6 +235,7 @@ loop do
   end
   threads.each { |t| t.join }
 
+  puts '[loop-end]is_file_loaded:' + is_file_loaded.to_s
   break if is_file_loaded
 end
 

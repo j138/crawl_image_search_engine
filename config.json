@@ -2,6 +2,7 @@
   "target_file": "search_keyword.txt",
   "save_dir": "img/",
   "provider": "yahoo",
+  "detect_face": false,
   "yahoo_id": "ur-yahoo-id",
   "yahoo_password": "ur-passwd",
   "thread_max": 10,
